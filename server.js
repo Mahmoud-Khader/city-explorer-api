@@ -6,7 +6,7 @@ require('dotenv').config();
 
 
 const cors = require('cors'); 
-const weather = require('./data/weather.json')
+const weatherData = require('./data/weather.json')
 
 
 
@@ -33,8 +33,11 @@ console.log(searchQuery);
 try{
     let findData=()=>{
    
-     let city =weather.find((city,idx)=>{
-       return city.city_name.toLowerCase()===searchQuery.toLowerCase() && city.lat===Number(lat) && city.lon==Number(lon)})
+     let city =weatherData.find(weather =>{
+         if (weather.city_name.toLocaleLowerCase() == req.query.searchQuery){
+             return weather;
+         }
+     })
    
     return city.data.map(item=>{
       return new ForeCast(item)
@@ -53,7 +56,7 @@ try{
 
     class ForeCast{
         constructor(weatherInfo){
-            this.date=weatherInfo.vaild_date;
+            this.date=weatherInfo.valid_date;
             this.description=weatherInfo.weather.description
         }
     }
