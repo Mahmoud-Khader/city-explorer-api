@@ -5,18 +5,31 @@ const MOVIE_API_KEY = process.env.MOVIE_API_KEY
 const axios = require('axios')
 module.exports = moviesHandler;
 
+let inMemory = [];
 function moviesHandler(req, res) {
     let searchQuery = req.query.searchQuery
     let movieUrl = `https://api.themoviedb.org/3/search/movie?api_key=${MOVIE_API_KEY}&query=${searchQuery}`
-    axios.get(movieUrl).then(Response => {
-        let movieArr = Response.data.results.map(item => {
-            return (new Movie(item.title, item.poster_path, item.original_language, item.vote_average, item.overview, item.vote_count, item.popularity, item.release_date)
-            )
+    if (inMemory[searchQuery] !== undefined) {
+        console.log('Data from our memory')
+        res.send(inMemory[searchQuery]);
+    } else {
+
+
+        axios.get(movieUrl).then(Response => {
+            console.log('Data from API server');
+
+            inMemory[searchQuery] = Response.data.results;
+
+            let movieArr = Response.data.results.map(item => {
+                return (new Movie(item.title, item.poster_path, item.original_language, item.vote_average, item.overview, item.vote_count, item.popularity, item.release_date)
+                )
+            })
+            res.status(200).send(movieArr)
+        }).catch(error => {
+            res.status(500).send(error)
         })
-        res.status(200).send(movieArr)
-    }).catch(error => {
-        res.status(500).send(error)
-    })
+    }
+    
 }
 
 class Movie {
